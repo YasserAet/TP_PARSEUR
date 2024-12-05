@@ -1,0 +1,84 @@
+public class DescendingParser {
+    private String input;
+    private int position;
+
+    public DescendingParser(String input) {
+        this.input = input;
+        this.position = 0;
+    }
+
+    private char currentChar() {
+        return position < input.length() ? input.charAt(position) : '\0';
+    }
+
+    // chd char w zid lgdam
+    private void consume(char expectedChar) {
+        if (currentChar() == expectedChar) {
+            position++;
+        } else {
+            throw new RuntimeException("Expected '" + expectedChar + "' found '" + currentChar() + "'");
+        }
+    }
+
+    // Parse S --> bSb | cAc
+    private void parseS() {
+        if (currentChar() == 'b') {
+            consume('b');
+            parseS();
+            consume('b');
+        } else if (currentChar() == 'c') {
+            consume('c');
+            parseA();
+            consume('c');
+        } else {
+            throw new RuntimeException("Invalid character in S: " + currentChar());
+        }
+    }
+
+    // Parse A --> bAA | cASAb | dcb | epsilon
+    private void parseA() {
+        if (currentChar() == 'b') {
+            consume('b');
+            parseA();
+            parseA();
+        } else if (currentChar() == 'c') {
+            consume('c');
+            parseA();
+            parseS();
+            consume('A');
+            consume('b');
+        } else if (currentChar() == 'd') {
+            consume('d');
+            consume('c');
+            consume('b');
+        } else {
+            // epsilon 
+        }
+    }
+
+    // Parsing the input from S
+    public void parse() {
+        parseS();
+        if (position != input.length()) {
+            throw new RuntimeException("Parsing error: extra characters found at the end.");
+        }
+    }
+
+    // Main method to test the parser
+    public static void main(String[] args) {
+        String[] testInputs = {
+            "cdcbc", "bcdcbcb", "cbdbcdcbc", "ccdbcdcbcdcbcbc", "cdcbbb", "cdcb", ""
+        };
+
+        for (String input : testInputs) {
+            try {
+                System.out.println("Testing input: " + input);
+                DescendingParser parser = new DescendingParser(input);
+                parser.parse();
+                System.out.println("Result: valide\n");
+            } catch (RuntimeException e) {
+                System.out.println("Result: Rejetee (" + e.getMessage() + ")\n");
+            }
+        }
+    }
+}
